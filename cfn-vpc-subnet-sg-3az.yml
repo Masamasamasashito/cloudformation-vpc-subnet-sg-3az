@@ -1,0 +1,1673 @@
+
+AWSTemplateFormatVersion: "2010-09-09"
+Description: 
+  VPC and Subnet Create
+
+Metadata: 
+  "AWS::CloudFormation::Interface": 
+    ParameterGroups: 
+      - Label: 
+          default: "Project Name Prefix"
+        Parameters: 
+          - PJPrefix
+          - PJEnv
+      - Label: 
+          default: "Network Configuration"
+        Parameters: 
+          - VPCCIDR
+          - PublicSubnet01aCIDR
+          - PublicSubnet01cCIDR
+          - PublicSubnet01dCIDR
+          - PublicSubnet02aCIDR
+          - PublicSubnet02cCIDR
+          - PublicSubnet02dCIDR
+          - PublicSubnet03aCIDR
+          - PublicSubnet03cCIDR
+          - PublicSubnet03dCIDR
+          - PrivateSubnet01aCIDR
+          - PrivateSubnet01cCIDR
+          - PrivateSubnet01dCIDR
+          - PrivateSubnet02aCIDR
+          - PrivateSubnet02cCIDR
+          - PrivateSubnet02dCIDR
+    ParameterLabels: 
+      VPCCIDR: 
+        default: "VPC CIDR"
+      PublicSubnet01aCIDR: 
+        default: "PublicSubnet01 A CIDR"
+      PublicSubnet01cCIDR: 
+        default: "PublicSubnet01 C CIDR"
+      PublicSubnet01dCIDR: 
+        default: "PublicSubnet01 D CIDR"
+      PublicSubnet02aCIDR:
+        default: "PublicSubnet02 A CIDR"
+      PublicSubnet02cCIDR:
+        default: "PublicSubnet02 C CIDR"
+      PublicSubnet02dCIDR:
+        default: "PublicSubnet02 D CIDR"
+      PublicSubnet03aCIDR:
+        default: "PublicSubnet03 A CIDR"
+      PublicSubnet03cCIDR:
+        default: "PublicSubnet03 C CIDR"
+      PublicSubnet03dCIDR:
+        default: "PublicSubnet03 D CIDR"
+      PrivateSubnet01aCIDR:
+        default: "PrivateSubnet01 A CIDR"
+      PrivateSubnet01cCIDR:
+        default: "PrivateSubnet01 C CIDR"
+      PrivateSubnet01dCIDR:
+        default: "PrivateSubnet01 D CIDR"
+      PrivateSubnet02aCIDR:
+        default: "PrivateSubnet02 A CIDR"
+      PrivateSubnet02cCIDR:
+        default: "PrivateSubnet02 C CIDR"
+      PrivateSubnet02dCIDR:
+        default: "PrivateSubnet02 D CIDR"
+
+# ------------------------------------------------------------#
+# Input Parameters
+# ------------------------------------------------------------# 
+# 
+# PJPefix : Project Prefix 
+# PJEnv : Project Environment  EX) prd01 , tst01 , dev01 , ...
+#  
+# ------------------------------------------------------------# 
+# Stack Name Example : {PJPrefix}-{PJEnv}-{ResourceType}-{Summary}-yyyymmdd(-count)
+# ------------------------------------------------------------# 
+# 
+# ResourceType：cfnstack
+# Summary：VpcSubnetSg
+#
+# ------------------------------------------------------------# 
+
+Parameters:
+  PJPrefix:
+    Type: String
+
+  PJEnv:
+    Type: String
+
+  VPCCIDR:
+    Type: String
+    Default: "10.1.0.0/16"
+
+  PublicSubnet01aCIDR:
+    Type: String
+    Default: "10.1.10.0/24"
+
+  PublicSubnet01cCIDR:
+    Type: String
+    Default: "10.1.20.0/24"
+
+  PublicSubnet01dCIDR:
+    Type: String
+    Default: "10.1.30.0/24"
+
+  PublicSubnet02aCIDR:
+    Type: String
+    Default: "10.1.40.0/24"
+
+  PublicSubnet02cCIDR:
+    Type: String
+    Default: "10.1.50.0/24"
+
+  PublicSubnet02dCIDR:
+    Type: String
+    Default: "10.1.60.0/24"
+
+  PublicSubnet03aCIDR:
+    Type: String
+    Default: "10.1.70.0/24"
+
+  PublicSubnet03cCIDR:
+    Type: String
+    Default: "10.1.80.0/24"
+
+  PublicSubnet03dCIDR:
+    Type: String
+    Default: "10.1.90.0/24"
+
+  PrivateSubnet01aCIDR:
+    Type: String
+    Default: "10.1.110.0/24"
+
+  PrivateSubnet01cCIDR:
+    Type: String
+    Default: "10.1.120.0/24"
+
+  PrivateSubnet01dCIDR:
+    Type: String
+    Default: "10.1.130.0/24"
+
+  PrivateSubnet02aCIDR:
+    Type: String
+    Default: "10.1.140.0/24"
+
+  PrivateSubnet02cCIDR:
+    Type: String
+    Default: "10.1.150.0/24"
+
+  PrivateSubnet02dCIDR:
+    Type: String
+    Default: "10.1.160.0/24"
+
+Resources: 
+# ------------------------------------------------------------#
+#  VPC
+# ------------------------------------------------------------#
+# VPC Create
+  VPC:
+    Type: "AWS::EC2::VPC"
+    Properties: 
+      CidrBlock: !Ref VPCCIDR
+      EnableDnsSupport: "true"
+      EnableDnsHostnames: "true"
+      InstanceTenancy: default
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-vpc"
+
+# InternetGateway Create
+  InternetGateway: 
+    Type: "AWS::EC2::InternetGateway"
+    Properties: 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-igw"
+
+# IGW Attach
+  InternetGatewayAttachment: 
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties: 
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC 
+
+# ------------------------------------------------------------#
+#  Subnet
+# ------------------------------------------------------------#          
+# Public Subnet01 A Create
+  PublicSubnet1A: 
+    Type: "AWS::EC2::Subnet"
+    Properties: 
+      AvailabilityZone: "ap-northeast-1a"
+      CidrBlock: !Ref PublicSubnet01aCIDR
+      VpcId: !Ref VPC 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-public-subnet01-a"
+
+# Public Subnet01 C Create
+  PublicSubnet1C: 
+    Type: "AWS::EC2::Subnet"
+    Properties: 
+      AvailabilityZone: "ap-northeast-1c"
+      CidrBlock: !Ref PublicSubnet01cCIDR
+      VpcId: !Ref VPC 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-public-subnet01-c"
+
+# Public Subnet01 D Create
+  PublicSubnet1D: 
+    Type: "AWS::EC2::Subnet"
+    Properties: 
+      AvailabilityZone: "ap-northeast-1d"
+      CidrBlock: !Ref PublicSubnet01dCIDR
+      VpcId: !Ref VPC 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-public-subnet01-d"
+
+# Public Subnet02 A Create
+  PublicSubnet2A: 
+    Type: "AWS::EC2::Subnet"
+    Properties: 
+      AvailabilityZone: "ap-northeast-1a"
+      CidrBlock: !Ref PublicSubnet02aCIDR
+      VpcId: !Ref VPC 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-public-subnet02-a"
+
+# Public Subnet02 C Create
+  PublicSubnet2C: 
+    Type: "AWS::EC2::Subnet"
+    Properties: 
+      AvailabilityZone: "ap-northeast-1c"
+      CidrBlock: !Ref PublicSubnet02cCIDR
+      VpcId: !Ref VPC 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-public-subnet02-c"
+
+# Public Subnet02 D Create
+  PublicSubnet2D: 
+    Type: "AWS::EC2::Subnet"
+    Properties: 
+      AvailabilityZone: "ap-northeast-1d"
+      CidrBlock: !Ref PublicSubnet02dCIDR
+      VpcId: !Ref VPC 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-public-subnet02-d"
+
+# Public Subnet03 A Create
+  PublicSubnet3A: 
+    Type: "AWS::EC2::Subnet"
+    Properties: 
+      AvailabilityZone: "ap-northeast-1a"
+      CidrBlock: !Ref PublicSubnet03aCIDR
+      VpcId: !Ref VPC 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-public-subnet03-a"
+
+# Public Subnet03 C Create
+  PublicSubnet3C: 
+    Type: "AWS::EC2::Subnet"
+    Properties: 
+      AvailabilityZone: "ap-northeast-1c"
+      CidrBlock: !Ref PublicSubnet03cCIDR
+      VpcId: !Ref VPC 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-public-subnet03-c"
+
+# Public Subnet03 D Create
+  PublicSubnet3D: 
+    Type: "AWS::EC2::Subnet"
+    Properties: 
+      AvailabilityZone: "ap-northeast-1d"
+      CidrBlock: !Ref PublicSubnet03dCIDR
+      VpcId: !Ref VPC 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-public-subnet03-d"
+
+# Private Subnet01 A Create
+  PrivateSubnet1A: 
+    Type: "AWS::EC2::Subnet"
+    Properties: 
+      AvailabilityZone: "ap-northeast-1a"
+      CidrBlock: !Ref PrivateSubnet01aCIDR
+      VpcId: !Ref VPC 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-private-subnet01-a"
+
+# Private Subnet01 C Create
+  PrivateSubnet1C: 
+    Type: "AWS::EC2::Subnet"
+    Properties: 
+      AvailabilityZone: "ap-northeast-1c"
+      CidrBlock: !Ref PrivateSubnet01cCIDR
+      VpcId: !Ref VPC 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-private-subnet01-c"
+
+# Private Subnet01 D Create
+  PrivateSubnet1D: 
+    Type: "AWS::EC2::Subnet"
+    Properties: 
+      AvailabilityZone: "ap-northeast-1d"
+      CidrBlock: !Ref PrivateSubnet01dCIDR
+      VpcId: !Ref VPC 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-private-subnet01-d"
+
+# Private Subnet02 A Create
+  PrivateSubnet2A: 
+    Type: "AWS::EC2::Subnet"
+    Properties: 
+      AvailabilityZone: "ap-northeast-1a"
+      CidrBlock: !Ref PrivateSubnet02aCIDR
+      VpcId: !Ref VPC 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-private-subnet02-a"
+
+# Private Subnet02 C Create
+  PrivateSubnet2C: 
+    Type: "AWS::EC2::Subnet"
+    Properties: 
+      AvailabilityZone: "ap-northeast-1c"
+      CidrBlock: !Ref PrivateSubnet02cCIDR
+      VpcId: !Ref VPC 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-private-subnet02-c"
+
+# Private Subnet02 D Create
+  PrivateSubnet2D: 
+    Type: "AWS::EC2::Subnet"
+    Properties: 
+      AvailabilityZone: "ap-northeast-1d"
+      CidrBlock: !Ref PrivateSubnet02dCIDR
+      VpcId: !Ref VPC 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-private-subnet02-d"
+
+# ------------------------------------------------------------#
+#  RouteTable
+# ------------------------------------------------------------#          
+# Public RouteTable1A Create
+  PublicRouteTable1A:
+    Type: "AWS::EC2::RouteTable"
+    Properties: 
+      VpcId: !Ref VPC 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-public-route1-a"
+          
+# Public RouteTable1C Create
+  PublicRouteTable1C:
+    Type: "AWS::EC2::RouteTable"
+    Properties: 
+      VpcId: !Ref VPC 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-public-route1-c"
+
+# Public RouteTable1D Create
+  PublicRouteTable1D:
+    Type: "AWS::EC2::RouteTable"
+    Properties: 
+      VpcId: !Ref VPC 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-public-route1-d"
+
+# Public RouteTable2A Create
+  PublicRouteTable2A:
+    Type: "AWS::EC2::RouteTable"
+    Properties: 
+      VpcId: !Ref VPC 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-public-route2-a"
+          
+# Public RouteTable2C Create
+  PublicRouteTable2C:
+    Type: "AWS::EC2::RouteTable"
+    Properties: 
+      VpcId: !Ref VPC 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-public-route2-c"
+
+# Public RouteTable2D Create
+  PublicRouteTable2D:
+    Type: "AWS::EC2::RouteTable"
+    Properties: 
+      VpcId: !Ref VPC 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-public-route2-d"
+
+# Public RouteTable3A Create
+  PublicRouteTable3A:
+    Type: "AWS::EC2::RouteTable"
+    Properties: 
+      VpcId: !Ref VPC 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-public-route3-a"
+          
+# Public RouteTable3C Create
+  PublicRouteTable3C:
+    Type: "AWS::EC2::RouteTable"
+    Properties: 
+      VpcId: !Ref VPC 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-public-route3-c"
+
+# Public RouteTable3D Create
+  PublicRouteTable3D:
+    Type: "AWS::EC2::RouteTable"
+    Properties: 
+      VpcId: !Ref VPC 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-public-route3-d"
+
+# Private RouteTable1A Create
+  PrivateRouteTable1A:
+    Type: "AWS::EC2::RouteTable"
+    Properties: 
+      VpcId: !Ref VPC 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-private-route1-a"
+
+# Private RouteTable1C Create
+  PrivateRouteTable1C: 
+    Type: "AWS::EC2::RouteTable"
+    Properties: 
+      VpcId: !Ref VPC 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-private-route1-c"
+
+# Private RouteTable1D Create
+  PrivateRouteTable1D:
+    Type: "AWS::EC2::RouteTable"
+    Properties: 
+      VpcId: !Ref VPC 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-private-route1-d"
+
+# Private RouteTable2A Create
+  PrivateRouteTable2A:
+    Type: "AWS::EC2::RouteTable"
+    Properties: 
+      VpcId: !Ref VPC 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-private-route2-a"
+
+# Private RouteTable2C Create
+  PrivateRouteTable2C:
+    Type: "AWS::EC2::RouteTable"
+    Properties: 
+      VpcId: !Ref VPC 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-private-route2-c"
+
+# Private RouteTable2D Create
+  PrivateRouteTable2D: 
+    Type: "AWS::EC2::RouteTable"
+    Properties: 
+      VpcId: !Ref VPC 
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-private-route2-d"
+
+
+# ------------------------------------------------------------#
+# Routing
+# ------------------------------------------------------------# 
+# PublicRoute1A Create
+  PublicRoute1A: 
+    Type: "AWS::EC2::Route"
+    Properties: 
+      RouteTableId: !Ref PublicRouteTable1A
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref InternetGateway
+
+# PublicRoute1C Create
+  PublicRoute1C: 
+    Type: "AWS::EC2::Route"
+    Properties: 
+      RouteTableId: !Ref PublicRouteTable1C
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref InternetGateway 
+
+# PublicRoute1D Create
+  PublicRoute1D:
+    Type: "AWS::EC2::Route"
+    Properties: 
+      RouteTableId: !Ref PublicRouteTable1D
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref InternetGateway 
+
+# PublicRoute2A Create
+  PublicRoute2A: 
+    Type: "AWS::EC2::Route"
+    Properties: 
+      RouteTableId: !Ref PublicRouteTable2A
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref InternetGateway
+
+# PublicRoute2C Create
+  PublicRoute2C: 
+    Type: "AWS::EC2::Route"
+    Properties: 
+      RouteTableId: !Ref PublicRouteTable2C
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref InternetGateway 
+
+# PublicRoute2D Create
+  PublicRoute2D:
+    Type: "AWS::EC2::Route"
+    Properties: 
+      RouteTableId: !Ref PublicRouteTable2D
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref InternetGateway 
+
+# PublicRoute3A Create
+  PublicRoute3A: 
+    Type: "AWS::EC2::Route"
+    Properties: 
+      RouteTableId: !Ref PublicRouteTable3A
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref InternetGateway
+
+# PublicRoute3C Create
+  PublicRoute3C: 
+    Type: "AWS::EC2::Route"
+    Properties: 
+      RouteTableId: !Ref PublicRouteTable3C
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref InternetGateway 
+
+# PublicRoute3D Create
+  PublicRoute3D:
+    Type: "AWS::EC2::Route"
+    Properties: 
+      RouteTableId: !Ref PublicRouteTable3D
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref InternetGateway 
+
+# ------------------------------------------------------------#
+# RouteTable Associate
+# ------------------------------------------------------------# 
+# PublicRouteTable 1a Associate Subnet1A
+  PublicSubnetARouteTable1aAssociation: 
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties: 
+      SubnetId: !Ref PublicSubnet1A
+      RouteTableId: !Ref PublicRouteTable1A
+
+# PublicRouteTable 1c Associate Subnet1C
+  PublicSubnetCRouteTable1cAssociation: 
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties: 
+      SubnetId: !Ref PublicSubnet1C
+      RouteTableId: !Ref PublicRouteTable1C
+
+# PublicRouteTable 1d Associate Subnet1D
+  PublicSubnetDRouteTable1dAssociation: 
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties: 
+      SubnetId: !Ref PublicSubnet1D
+      RouteTableId: !Ref PublicRouteTable1D
+
+# PublicRouteTable 2a Associate Subnet2A
+  PublicSubnetARouteTable2aAssociation: 
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties: 
+      SubnetId: !Ref PublicSubnet2A
+      RouteTableId: !Ref PublicRouteTable2A
+
+# PublicRouteTable 2c Associate Subnet2C
+  PublicSubnetCRouteTable2cAssociation: 
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties: 
+      SubnetId: !Ref PublicSubnet2C
+      RouteTableId: !Ref PublicRouteTable2C
+
+# PublicRouteTable 2d Associate Subnet2D
+  PublicSubnetDRouteTable2dAssociation: 
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties: 
+      SubnetId: !Ref PublicSubnet2D
+      RouteTableId: !Ref PublicRouteTable2D
+
+# PublicRouteTable 3a Associate Subnet3A
+  PublicSubnetARouteTable3aAssociation: 
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties: 
+      SubnetId: !Ref PublicSubnet3A
+      RouteTableId: !Ref PublicRouteTable3A
+
+# PublicRouteTable 3c Associate Subnet3C
+  PublicSubnetCRouteTable3cAssociation: 
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties: 
+      SubnetId: !Ref PublicSubnet3C
+      RouteTableId: !Ref PublicRouteTable3C
+
+# PublicRouteTable 3d Associate Subnet3D
+  PublicSubnetDRouteTable3dAssociation: 
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties: 
+      SubnetId: !Ref PublicSubnet3D
+      RouteTableId: !Ref PublicRouteTable3D
+
+# PrivateRouteTable 1a Associate Subnet1A
+  PrivateSubnetARouteTable1aAssociation: 
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties: 
+      SubnetId: !Ref PrivateSubnet1A
+      RouteTableId: !Ref PrivateRouteTable1A 
+
+# PrivateRouteTable 1c Associate Subnet1C
+  PrivateSubnetCRouteTable1cAssociation: 
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties: 
+      SubnetId: !Ref PrivateSubnet1C
+      RouteTableId: !Ref PrivateRouteTable1C
+
+# PrivateRouteTable 1d Associate Subnet1D
+  PrivateSubnetDRouteTable1dAssociation: 
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties: 
+      SubnetId: !Ref PrivateSubnet1D
+      RouteTableId: !Ref PrivateRouteTable1D
+
+# PrivateRouteTable 2a Associate Subnet2A
+  PrivateSubnetARouteTable2aAssociation: 
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties: 
+      SubnetId: !Ref PrivateSubnet2A
+      RouteTableId: !Ref PrivateRouteTable2A 
+
+# PrivateRouteTable 2c Associate Subnet2C
+  PrivateSubnetCRouteTable2cAssociation: 
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties: 
+      SubnetId: !Ref PrivateSubnet2C
+      RouteTableId: !Ref PrivateRouteTable2C
+
+# PrivateRouteTable 2d Associate Subnet2D
+  PrivateSubnetDRouteTable2dAssociation: 
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties: 
+      SubnetId: !Ref PrivateSubnet2D
+      RouteTableId: !Ref PrivateRouteTable2D
+
+
+# ここから
+
+# ------------------------------------------------------------#
+# NetworkACL Create
+# ------------------------------------------------------------#
+
+  PublicSubnet01aNacl:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref VPC
+      Tags: 
+        - Key: Name
+          Value: !Sub ${PJPrefix}-${PJEnv}-nacl-public-subnet01-a
+
+  PublicSubnet01cNacl:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref VPC
+      Tags: 
+        - Key: Name
+          Value: !Sub ${PJPrefix}-${PJEnv}-nacl-public-subnet01-c
+
+  PublicSubnet01dNacl:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref VPC
+      Tags: 
+        - Key: Name
+          Value: !Sub ${PJPrefix}-${PJEnv}-nacl-public-subnet01-d
+
+  PublicSubnet02aNacl:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref VPC
+      Tags: 
+        - Key: Name
+          Value: !Sub ${PJPrefix}-${PJEnv}-nacl-public-subnet02-a
+
+  PublicSubnet02cNacl:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref VPC
+      Tags: 
+        - Key: Name
+          Value: !Sub ${PJPrefix}-${PJEnv}-nacl-public-subnet02-c
+
+  PublicSubnet02dNacl:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref VPC
+      Tags: 
+        - Key: Name
+          Value: !Sub ${PJPrefix}-${PJEnv}-nacl-public-subnet02-d
+
+  PublicSubnet03aNacl:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref VPC
+      Tags: 
+        - Key: Name
+          Value: !Sub ${PJPrefix}-${PJEnv}-nacl-public-subnet03-a
+
+  PublicSubnet03cNacl:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref VPC
+      Tags: 
+        - Key: Name
+          Value: !Sub ${PJPrefix}-${PJEnv}-nacl-public-subnet03-c
+
+  PublicSubnet03dNacl:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref VPC
+      Tags: 
+        - Key: Name
+          Value: !Sub ${PJPrefix}-${PJEnv}-nacl-public-subnet03-d
+
+  PrivateSubnet01aNacl:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref VPC
+      Tags: 
+        - Key: Name
+          Value: !Sub ${PJPrefix}-${PJEnv}-nacl-private-subnet01-a
+
+  PrivateSubnet01cNacl:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref VPC
+      Tags: 
+        - Key: Name
+          Value: !Sub ${PJPrefix}-${PJEnv}-nacl-private-subnet01-c
+
+  PrivateSubnet01dNacl:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref VPC
+      Tags: 
+        - Key: Name
+          Value: !Sub ${PJPrefix}-${PJEnv}-nacl-private-subnet01-d
+
+  PrivateSubnet02aNacl:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref VPC
+      Tags: 
+        - Key: Name
+          Value: !Sub ${PJPrefix}-${PJEnv}-nacl-private-subnet02-a
+
+  PrivateSubnet02cNacl:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref VPC
+      Tags: 
+        - Key: Name
+          Value: !Sub ${PJPrefix}-${PJEnv}-nacl-private-subnet02-c
+
+  PrivateSubnet02dNacl:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref VPC
+      Tags: 
+        - Key: Name
+          Value: !Sub ${PJPrefix}-${PJEnv}-nacl-private-subnet02-d
+
+# ------------------------------------------------------------#
+# NetworkACL Entry Inbound すべて許可
+# ------------------------------------------------------------#
+
+  PublicSubnet01aNaclEntryInbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties: 
+      Egress: false
+      RuleNumber: 100
+      RuleAction: allow
+      Protocol: -1
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PublicSubnet01aNacl
+
+  PublicSubnet01cNaclEntryInbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties: 
+      Egress: false
+      RuleNumber: 100
+      RuleAction: allow
+      Protocol: -1
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PublicSubnet01cNacl
+
+  PublicSubnet01dNaclEntryInbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties: 
+      Egress: false
+      RuleNumber: 100
+      RuleAction: allow
+      Protocol: -1
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PublicSubnet01dNacl
+
+  PublicSubnet02aNaclEntryInbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties: 
+      Egress: false
+      RuleNumber: 100
+      RuleAction: allow
+      Protocol: -1
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PublicSubnet02aNacl
+
+  PublicSubnet02cNaclEntryInbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties: 
+      Egress: false
+      RuleNumber: 100
+      RuleAction: allow
+      Protocol: -1
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PublicSubnet02cNacl
+
+  PublicSubnet02dNaclEntryInbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties: 
+      Egress: false
+      RuleNumber: 100
+      RuleAction: allow
+      Protocol: -1
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PublicSubnet02dNacl
+
+  PublicSubnet03aNaclEntryInbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties: 
+      Egress: false
+      RuleNumber: 100
+      RuleAction: allow
+      Protocol: -1
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PublicSubnet03aNacl
+
+  PublicSubnet03cNaclEntryInbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties: 
+      Egress: false
+      RuleNumber: 100
+      RuleAction: allow
+      Protocol: -1
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PublicSubnet03cNacl
+
+  PublicSubnet03dNaclEntryInbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties: 
+      Egress: false
+      RuleNumber: 100
+      RuleAction: allow
+      Protocol: -1
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PublicSubnet03dNacl
+
+  PrivateSubnet01aNaclEntryInbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties: 
+      Egress: false
+      RuleNumber: 100
+      RuleAction: allow
+      Protocol: -1
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PrivateSubnet01aNacl
+
+  PrivateSubnet01cNaclEntryInbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties: 
+      Egress: false
+      RuleNumber: 100
+      RuleAction: allow
+      Protocol: -1
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PrivateSubnet01cNacl
+
+  PrivateSubnet01dNaclEntryInbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties: 
+      Egress: false
+      RuleNumber: 100
+      RuleAction: allow
+      Protocol: -1
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PrivateSubnet01dNacl
+
+  PrivateSubnet02aNaclEntryInbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties: 
+      Egress: false
+      RuleNumber: 100
+      RuleAction: allow
+      Protocol: -1
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PrivateSubnet02aNacl
+
+  PrivateSubnet02cNaclEntryInbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties: 
+      Egress: false
+      RuleNumber: 100
+      RuleAction: allow
+      Protocol: -1
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PrivateSubnet02cNacl
+
+  PrivateSubnet02dNaclEntryInbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties: 
+      Egress: false
+      RuleNumber: 100
+      RuleAction: allow
+      Protocol: -1
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PrivateSubnet02dNacl
+
+# ------------------------------------------------------------#
+# NetworkACL Entry Outbound すべて許可
+# ------------------------------------------------------------#
+
+  PublicSubnet01aNaclEntryOutbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties: 
+      Egress: true
+      RuleNumber: 100
+      RuleAction: allow
+      Protocol: -1
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PublicSubnet01aNacl
+
+  PublicSubnet01cNaclEntryOutbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties: 
+      Egress: true
+      RuleNumber: 100
+      RuleAction: allow
+      Protocol: -1
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PublicSubnet01cNacl
+
+  PublicSubnet01dNaclEntryOutbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties: 
+      Egress: true
+      RuleNumber: 100
+      RuleAction: allow
+      Protocol: -1
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PublicSubnet01dNacl
+
+  PublicSubnet02aNaclEntryOutbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties: 
+      Egress: true
+      RuleNumber: 100
+      RuleAction: allow
+      Protocol: -1
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PublicSubnet02aNacl
+
+  PublicSubnet02cNaclEntryOutbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties: 
+      Egress: true
+      RuleNumber: 100
+      RuleAction: allow
+      Protocol: -1
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PublicSubnet02cNacl
+
+  PublicSubnet02dNaclEntryOutbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties: 
+      Egress: true
+      RuleNumber: 100
+      RuleAction: allow
+      Protocol: -1
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PublicSubnet02dNacl
+
+  PublicSubnet03aNaclEntryOutbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties: 
+      Egress: true
+      RuleNumber: 100
+      RuleAction: allow
+      Protocol: -1
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PublicSubnet03aNacl
+
+  PublicSubnet03cNaclEntryOutbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties: 
+      Egress: true
+      RuleNumber: 100
+      RuleAction: allow
+      Protocol: -1
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PublicSubnet03cNacl
+
+  PublicSubnet03dNaclEntryOutbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties: 
+      Egress: true
+      RuleNumber: 100
+      RuleAction: allow
+      Protocol: -1
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PublicSubnet03dNacl
+
+  PrivateSubnet01aNaclEntryOutbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties: 
+      Egress: true
+      RuleNumber: 100
+      RuleAction: allow
+      Protocol: -1
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PrivateSubnet01aNacl
+
+  PrivateSubnet01cNaclEntryOutbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties: 
+      Egress: true
+      RuleNumber: 100
+      RuleAction: allow
+      Protocol: -1
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PrivateSubnet01cNacl
+
+  PrivateSubnet01dNaclEntryOutbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties: 
+      Egress: true
+      RuleNumber: 100
+      RuleAction: allow
+      Protocol: -1
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PrivateSubnet01dNacl
+
+  PrivateSubnet02aNaclEntryOutbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties: 
+      Egress: true
+      RuleNumber: 100
+      RuleAction: allow
+      Protocol: -1
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PrivateSubnet02aNacl
+
+  PrivateSubnet02cNaclEntryOutbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties: 
+      Egress: true
+      RuleNumber: 100
+      RuleAction: allow
+      Protocol: -1
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PrivateSubnet02cNacl
+
+  PrivateSubnet02dNaclEntryOutbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties: 
+      Egress: true
+      RuleNumber: 100
+      RuleAction: allow
+      Protocol: -1
+      CidrBlock: 0.0.0.0/0
+      NetworkAclId: !Ref PrivateSubnet02dNacl
+
+# ------------------------------------------------------------#
+# SUbnet NetworkACL Association
+# ------------------------------------------------------------#
+
+  PublicSubnet01aNaclAssoc:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties: 
+      NetworkAclId: !Ref PublicSubnet01aNacl
+      SubnetId: !Ref PublicSubnet1A
+
+  PublicSubnet01cNaclAssoc:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties: 
+      NetworkAclId: !Ref PublicSubnet01cNacl
+      SubnetId: !Ref PublicSubnet1C
+
+  PublicSubnet01dNaclAssoc:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties: 
+      NetworkAclId: !Ref PublicSubnet01dNacl
+      SubnetId: !Ref PublicSubnet1D
+
+  PublicSubnet02aNaclAssoc:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties: 
+      NetworkAclId: !Ref PublicSubnet02aNacl
+      SubnetId: !Ref PublicSubnet2A
+
+  PublicSubnet02cNaclAssoc:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties: 
+      NetworkAclId: !Ref PublicSubnet02cNacl
+      SubnetId: !Ref PublicSubnet2C
+
+  PublicSubnet02dNaclAssoc:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties: 
+      NetworkAclId: !Ref PublicSubnet02dNacl
+      SubnetId: !Ref PublicSubnet2D
+
+  PublicSubnet03aNaclAssoc:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties: 
+      NetworkAclId: !Ref PublicSubnet03aNacl
+      SubnetId: !Ref PublicSubnet3A
+
+  PublicSubnet03cNaclAssoc:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties: 
+      NetworkAclId: !Ref PublicSubnet03cNacl
+      SubnetId: !Ref PublicSubnet3C
+
+  PublicSubnet03dNaclAssoc:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties: 
+      NetworkAclId: !Ref PublicSubnet03dNacl
+      SubnetId: !Ref PublicSubnet3D
+
+  PrivateSubnet01aNaclAssoc:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties: 
+      NetworkAclId: !Ref PrivateSubnet01aNacl
+      SubnetId: !Ref PrivateSubnet1A
+
+  PrivateSubnet01cNaclAssoc:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties: 
+      NetworkAclId: !Ref PrivateSubnet01cNacl
+      SubnetId: !Ref PrivateSubnet1C
+
+  PrivateSubnet01dNaclAssoc:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties: 
+      NetworkAclId: !Ref PrivateSubnet01dNacl
+      SubnetId: !Ref PrivateSubnet1D
+
+  PrivateSubnet02aNaclAssoc:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties: 
+      NetworkAclId: !Ref PrivateSubnet02aNacl
+      SubnetId: !Ref PrivateSubnet2A
+
+  PrivateSubnet02cNaclAssoc:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties: 
+      NetworkAclId: !Ref PrivateSubnet02cNacl
+      SubnetId: !Ref PrivateSubnet2C
+
+  PrivateSubnet02dNaclAssoc:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties: 
+      NetworkAclId: !Ref PrivateSubnet02dNacl
+      SubnetId: !Ref PrivateSubnet2D
+
+# ------------------------------------------------------------#
+# Security Groups すべて、インバウンド無し、フルアウトバウンドオープン
+# ------------------------------------------------------------#
+
+  EC2SecurityGroup01PublicSubnet01a:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "SecurityGroup01PublicSubnet01a"
+      GroupName: !Sub "${PJPrefix}-${PJEnv}-sg01-public-subnet01-a"
+      VpcId: !Ref VPC
+      SecurityGroupEgress:
+      - CidrIp: "0.0.0.0/0"
+        IpProtocol: "-1"
+        FromPort: -1
+        ToPort: -1
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-sg01-public-subnet01-a"
+
+  EC2SecurityGroup01PublicSubnet01c:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "SecurityGroup01PublicSubnet01c"
+      GroupName: !Sub "${PJPrefix}-${PJEnv}-sg01-public-subnet01-c"
+      VpcId: !Ref VPC
+      SecurityGroupEgress:
+      - CidrIp: "0.0.0.0/0"
+        IpProtocol: "-1"
+        FromPort: -1
+        ToPort: -1
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-sg01-public-subnet01-c"
+
+  EC2SecurityGroup01PublicSubnet01d:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "SecurityGroup01PublicSubnet01d"
+      GroupName: !Sub "${PJPrefix}-${PJEnv}-sg01-public-subnet01-d"
+      VpcId: !Ref VPC
+      SecurityGroupEgress:
+      - CidrIp: "0.0.0.0/0"
+        IpProtocol: "-1"
+        FromPort: -1
+        ToPort: -1
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-sg01-public-subnet01-d"
+
+  EC2SecurityGroup01PublicSubnet02a:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "SecurityGroup01PublicSubnet02a"
+      GroupName: !Sub "${PJPrefix}-${PJEnv}-sg01-public-subnet02-a"
+      VpcId: !Ref VPC
+      SecurityGroupEgress:
+      - CidrIp: "0.0.0.0/0"
+        IpProtocol: "-1"
+        FromPort: -1
+        ToPort: -1
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-sg01-public-subnet02-a"
+
+  EC2SecurityGroup01PublicSubnet02c:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "SecurityGroup01PublicSubnet02c"
+      GroupName: !Sub "${PJPrefix}-${PJEnv}-sg01-public-subnet02-c"
+      VpcId: !Ref VPC
+      SecurityGroupEgress:
+      - CidrIp: "0.0.0.0/0"
+        IpProtocol: "-1"
+        FromPort: -1
+        ToPort: -1
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-sg01-public-subnet02-c"
+
+  EC2SecurityGroup01PublicSubnet02d:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "SecurityGroup01PublicSubnet02d"
+      GroupName: !Sub "${PJPrefix}-${PJEnv}-sg01-public-subnet02-d"
+      VpcId: !Ref VPC
+      SecurityGroupEgress:
+      - CidrIp: "0.0.0.0/0"
+        IpProtocol: "-1"
+        FromPort: -1
+        ToPort: -1
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-sg01-public-subnet02-d"
+
+  EC2SecurityGroup01PublicSubnet03a:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "SecurityGroup01PublicSubnet03a"
+      GroupName: !Sub "${PJPrefix}-${PJEnv}-sg01-public-subnet03-a"
+      VpcId: !Ref VPC
+      SecurityGroupEgress:
+      - CidrIp: "0.0.0.0/0"
+        IpProtocol: "-1"
+        FromPort: -1
+        ToPort: -1
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-sg01-public-subnet03-a"
+
+  EC2SecurityGroup01PublicSubnet03c:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "SecurityGroup01PublicSubnet03c"
+      GroupName: !Sub "${PJPrefix}-${PJEnv}-sg01-public-subnet03-c"
+      VpcId: !Ref VPC
+      SecurityGroupEgress:
+      - CidrIp: "0.0.0.0/0"
+        IpProtocol: "-1"
+        FromPort: -1
+        ToPort: -1
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-sg01-public-subnet03-c"
+
+  EC2SecurityGroup01PublicSubnet03d:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "SecurityGroup01PublicSubnet03d"
+      GroupName: !Sub "${PJPrefix}-${PJEnv}-sg01-public-subnet03-d"
+      VpcId: !Ref VPC
+      SecurityGroupEgress:
+      - CidrIp: "0.0.0.0/0"
+        IpProtocol: "-1"
+        FromPort: -1
+        ToPort: -1
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-sg01-public-subnet03-d"
+
+  EC2SecurityGroup01PrivateSubnet01a:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "SecurityGroup01PrivateSubnet01a"
+      GroupName: !Sub "${PJPrefix}-${PJEnv}-sg01-private-subnet01-a"
+      VpcId: !Ref VPC
+      SecurityGroupEgress:
+      - CidrIp: "0.0.0.0/0"
+        IpProtocol: "-1"
+        FromPort: -1
+        ToPort: -1
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-sg01-private-subnet01-a"
+
+  EC2SecurityGroup01PrivateSubnet01c:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "SecurityGroup01PrivateSubnet01c"
+      GroupName: !Sub "${PJPrefix}-${PJEnv}-sg01-private-subnet01-c"
+      VpcId: !Ref VPC
+      SecurityGroupEgress:
+      - CidrIp: "0.0.0.0/0"
+        IpProtocol: "-1"
+        FromPort: -1
+        ToPort: -1
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-sg01-private-subnet01-c"
+
+  EC2SecurityGroup01PrivateSubnet01d:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "SecurityGroup01PrivateSubnet01d"
+      GroupName: !Sub "${PJPrefix}-${PJEnv}-sg01-private-subnet01-d"
+      VpcId: !Ref VPC
+      SecurityGroupEgress:
+      - CidrIp: "0.0.0.0/0"
+        IpProtocol: "-1"
+        FromPort: -1
+        ToPort: -1
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-sg01-private-subnet01-d"
+
+  EC2SecurityGroup01PrivateSubnet02a:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "SecurityGroup01PrivateSubnet02a"
+      GroupName: !Sub "${PJPrefix}-${PJEnv}-sg01-private-subnet02-a"
+      VpcId: !Ref VPC
+      SecurityGroupEgress:
+      - CidrIp: "0.0.0.0/0"
+        IpProtocol: "-1"
+        FromPort: -1
+        ToPort: -1
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-sg01-private-subnet02-a"
+
+  EC2SecurityGroup01PrivateSubnet02c:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "SecurityGroup01PrivateSubnet02c"
+      GroupName: !Sub "${PJPrefix}-${PJEnv}-sg01-private-subnet02-c"
+      VpcId: !Ref VPC
+      SecurityGroupEgress:
+      - CidrIp: "0.0.0.0/0"
+        IpProtocol: "-1"
+        FromPort: -1
+        ToPort: -1
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-sg01-private-subnet02-c"
+
+  EC2SecurityGroup01PrivateSubnet02d:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "SecurityGroup01PrivateSubnet02d"
+      GroupName: !Sub "${PJPrefix}-${PJEnv}-sg01-private-subnet02-d"
+      VpcId: !Ref VPC
+      SecurityGroupEgress:
+      - CidrIp: "0.0.0.0/0"
+        IpProtocol: "-1"
+        FromPort: -1
+        ToPort: -1
+      Tags: 
+        - Key: Name
+          Value: !Sub "${PJPrefix}-${PJEnv}-sg01-private-subnet02-d"
+
+# ------------------------------------------------------------#
+# Output Parameters
+# ------------------------------------------------------------#
+Outputs:
+# VPC
+  VPC:
+    Value: !Ref VPC
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-vpc"
+
+  VPCCIDR:
+    Value: !Ref VPCCIDR
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-vpc-cidr"
+
+# Subnet
+  PublicSubnet1A:
+    Value: !Ref PublicSubnet1A
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-public-subnet01-a"
+
+  PublicSubnet01aCIDR:
+    Value: !Ref PublicSubnet01aCIDR
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-public-subnet01-a-cidr"
+
+  PublicSubnet1C:
+    Value: !Ref PublicSubnet1C
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-public-subnet01-c"
+
+  PublicSubnet01cCIDR:
+    Value: !Ref PublicSubnet01cCIDR
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-public-subnet01-c-cidr"
+
+  PublicSubnet1D:
+    Value: !Ref PublicSubnet1D
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-public-subnet01-d"
+
+  PublicSubnet01dCIDR:
+    Value: !Ref PublicSubnet01dCIDR
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-public-subnet01-d-cidr"
+
+  PublicSubnet2A:
+    Value: !Ref PublicSubnet2A
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-public-subnet02-a"
+
+  PublicSubnet02aCIDR:
+    Value: !Ref PublicSubnet02aCIDR
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-public-subnet02-a-cidr"
+
+  PublicSubnet2C:
+    Value: !Ref PublicSubnet2C
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-public-subnet02-c"
+
+  PublicSubnet02cCIDR:
+    Value: !Ref PublicSubnet02cCIDR
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-public-subnet02-c-cidr"
+
+  PublicSubnet2D:
+    Value: !Ref PublicSubnet2D
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-public-subnet02-d"
+
+  PublicSubnet02dCIDR:
+    Value: !Ref PublicSubnet02dCIDR
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-public-subnet02-d-cidr"
+
+  PublicSubnet3A:
+    Value: !Ref PublicSubnet3A
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-public-subnet03-a"
+
+  PublicSubnet03aCIDR:
+    Value: !Ref PublicSubnet03aCIDR
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-public-subnet03-a-cidr"
+
+  PublicSubnet3C:
+    Value: !Ref PublicSubnet3C
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-public-subnet03-c"
+
+  PublicSubnet03cCIDR:
+    Value: !Ref PublicSubnet03cCIDR
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-public-subnet03-c-cidr"
+
+  PublicSubnet3D:
+    Value: !Ref PublicSubnet3D
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-public-subnet03-d"
+
+  PublicSubnet03dCIDR:
+    Value: !Ref PublicSubnet03dCIDR
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-public-subnet03-d-cidr"
+
+  PrivateSubnet1A:
+    Value: !Ref PrivateSubnet1A
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-private-subnet01-a"
+    
+  PrivateSubnet01aCIDR:
+    Value: !Ref PrivateSubnet01aCIDR
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-private-subnet01-a-cidr"
+
+  PrivateSubnet1C:
+    Value: !Ref PrivateSubnet1C
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-private-subnet01-c"
+
+  PrivateSubnet01cCIDR:
+    Value: !Ref PrivateSubnet01cCIDR
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-private-subnet01-c-cidr"
+
+  PrivateSubnet1D:
+    Value: !Ref PrivateSubnet1D
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-private-subnet01-d"
+
+  PrivateSubnet01dCIDR:
+    Value: !Ref PrivateSubnet01dCIDR
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-private-subnet01-d-cidr"
+
+  PrivateSubnet2A:
+    Value: !Ref PrivateSubnet2A
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-private-subnet02-a"
+    
+  PrivateSubnet02aCIDR:
+    Value: !Ref PrivateSubnet02aCIDR
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-private-subnet02-a-cidr"
+
+  PrivateSubnet2C:
+    Value: !Ref PrivateSubnet2C
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-private-subnet02-c"
+
+  PrivateSubnet02cCIDR:
+    Value: !Ref PrivateSubnet02cCIDR
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-private-subnet02-c-cidr"
+
+  PrivateSubnet2D:
+    Value: !Ref PrivateSubnet2D
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-private-subnet02-d"
+
+  PrivateSubnet02dCIDR:
+    Value: !Ref PrivateSubnet02dCIDR
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-private-subnet02-d-cidr"
+
+# RouteTable
+  PublicRouteTable1A:
+    Value: !Ref PublicRouteTable1A
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-public-routetable01-a"
+
+  PublicRouteTable1C:
+    Value: !Ref PublicRouteTable1C
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-public-routetable01-c"
+
+  PublicRouteTable1D:
+    Value: !Ref PublicRouteTable1D
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-public-routetable01-d"
+
+  PublicRouteTable2A:
+    Value: !Ref PublicRouteTable2A
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-public-routetable02-a"
+
+  PublicRouteTable2C:
+    Value: !Ref PublicRouteTable2C
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-public-routetable02-c"
+
+  PublicRouteTable2D:
+    Value: !Ref PublicRouteTable2D
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-public-routetable02-d"
+
+  PublicRouteTable3A:
+    Value: !Ref PublicRouteTable3A
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-public-routetable03-a"
+
+  PublicRouteTable3C:
+    Value: !Ref PublicRouteTable3C
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-public-routetable03-c"
+
+  PublicRouteTable3D:
+    Value: !Ref PublicRouteTable3D
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-public-routetable03-d"
+
+  PrivateRouteTable1A:
+    Value: !Ref PrivateRouteTable1A
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-private-routetable01-a"
+
+  PrivateRouteTable1C:
+    Value: !Ref PrivateRouteTable1C
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-private-routetable01-c"
+
+  PrivateRouteTable1D:
+    Value: !Ref PrivateRouteTable1D
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-private-routetable01-d"
+
+  PrivateRouteTable2A:
+    Value: !Ref PrivateRouteTable2A
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-private-routetable02-a"
+
+  PrivateRouteTable2C:
+    Value: !Ref PrivateRouteTable2C
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-private-routetable02-c"
+
+  PrivateRouteTable2D:
+    Value: !Ref PrivateRouteTable2D
+    Export:
+      Name: !Sub "${PJPrefix}-${PJEnv}-private-routetable02-d"
