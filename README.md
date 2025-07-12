@@ -21,3 +21,7 @@ AZは、構成図のように1a,1c,1dとしています。
 # CloudForamtion用ymlファイル
 
 [https://github.com/Masamasamasashito/cloudformation-vpc-subnet-sg-3az/blob/main/cfn-vpc-subnet-sg-3az.yml](https://github.com/Masamasamasashito/cloudformation-vpc-subnet-sg-3az/blob/main/cfn-vpc-subnet-sg-3az.yml)
+
+# drawioファイル
+
+[https://github.com/Masamasamasashito/cloudformation-vpc-subnet-sg-3az/blob/main/cloudformation-vpc-subnet-nacl-routetable-sg.drawio](https://github.com/Masamasamasashito/cloudformation-vpc-subnet-sg-3az/blob/main/cloudformation-vpc-subnet-nacl-routetable-sg.drawio)
