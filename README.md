@@ -17,7 +17,9 @@ AZは、構成図のように1a,1c,1dとしています。
 * ネットワークACL:15個（デフォルト）
 * ルートテーブル：15個（パブリックサブネットは 0.0.0.0/0 IGW 有）
 
-# ymlアップロード後のプライベートIP等の入力画面
+# CloudFormationでymlアップロード後「スタックの詳細を指定」画面
+
+プロジェクトPrefix、プロジェクトEnv、各種CIDRを入力できます
 
 ![画面](https://github.com/Masamasamasashito/cloudformation-vpc-subnet-sg-3az/blob/main/cloudformation-vpc-subnet-nacl-routetable-sg-3az-stack.jpg)
 
